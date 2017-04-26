@@ -52,9 +52,12 @@ while True:
         print(msg)
 
         offset = pos_x + pos_y*5
+        print("offset = %d" % offset)
         try:
-            value = int(msg[offset])
-            microbit.display.show(microbit.Image()*value)
+            value = int(msg[offset:offset+1])
+            print("value = %d" % value)
+            image = microbit.Image().invert() * (value / 9)
+            microbit.display.show(image)
         except ValueError:
             print(msg)
         except IndexError:
