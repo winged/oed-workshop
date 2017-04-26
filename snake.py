@@ -2,6 +2,8 @@ import microbit
 import random
 import radio
 
+
+
 class BigDisplay:
 
     def __init__(self):
@@ -18,11 +20,9 @@ class BigDisplay:
         assert y >= 0
         assert y < 5
 
-        old_state = "%s" % self.state
         self.state[x + y*5] = str(value)[0]
 
-        if self.state != old_state:
-            self.send_pixel_update(x, y, value)
+        self.send_update()
 
     def get_pixel(self, x, y):
         assert x >= 0
@@ -32,25 +32,29 @@ class BigDisplay:
 
         return int(self.state[x + y*5])
 
-    def clear(self):
+    def clear(self, send_update=True):
         self.state = ['0'] * 25
-        self.send_global_update()
+        if send_update:
+            self.send_update()
 
     def show(self, image):
         if image != self.state:
-            self.state = image
-            self.send_global_update()
+            self.state = list(image)
+            self.send_update()
 
-    def send_global_update(self):
-        for x in range(5):
-            for y in range(5):
-                self.send_pixel_update(x, y, self.state[x + y*5])
-        # radio.send("global:%s" % "".join(self.state))
+    def send_update(self):
+        msg = "%s" % "".join(self.state)
+        radio.send_bytes(msg)
 
-    def send_pixel_update(self, x, y, value):
-        radio.send("pixel:%d:%d:%d" % (x, y, int(value)))
-
-disp = BigDisplay()
+# Initialize: Decide whether using local display or "big display" mode
+microbit.display.scroll("A: BIG, B: SMALL")
+while True:
+    if microbit.button_a.was_pressed()
+        disp = BigDisplay()
+        break
+    elif microbit.button_b.was_pressed():
+        disp = microbit.display
+        break
 
 # There's always a goodie somewhere. If the head reaches
 # it, we get longer and faster.
@@ -142,10 +146,10 @@ while True:
 
     # Draw the snake
     disp.clear()
-    disp.set_pixel(head[0], head[1], 5)
+    disp.set_pixel(head[0], head[1], 8)
     for pos in tail.keys():
         # display tail bit
-        disp.set_pixel(pos[0], pos[1], 2)
+        disp.set_pixel(pos[0], pos[1], 7)
 
         # remove tail if counter reached 0
         tail[pos] -= 1
